@@ -1,21 +1,42 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from "react";
+import writeScreen from "./screen/writeScreen";
+import readScreen from "./screen/readScreen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { Image } from "react-native";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const Tab = createBottomTabNavigator();
+
+export default class App extends Component {
+  render() {
+    return (
+      <NavigationContainer>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({}) => {
+              let imgName;
+
+              if (route.name === "Read Story") {
+                imgName = require("./assets/read.png");
+              } else if (route.name === "Write Story") {
+                imgName = require("./assets/write.png");
+              }
+
+              // You can return any component that you like here!
+              return (
+                <Image style={{ width: 20, height: 20 }} source={imgName} />
+              );
+            },
+          })}
+          tabBarOptions={{
+            activeTintColor: "tomato",
+            inactiveTintColor: "gray",
+          }}
+        >
+          <Tab.Screen name="Read Story" component={readScreen} />
+          <Tab.Screen name="Write Story" component={writeScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    );
+  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
