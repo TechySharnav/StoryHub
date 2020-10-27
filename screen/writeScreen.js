@@ -8,8 +8,28 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Header } from "react-native-elements";
+import db from "../config.js";
 
 export default class writeScreen extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      storyTitle: "",
+      storyAuthor: "",
+      story: "",
+    };
+  }
+
+  submitStory = async () => {
+    console.log("Submitting");
+    db.collection("stories").add({
+      storyTitle: this.state.storyTitle,
+      storyAuthor: this.state.storyAuthor,
+      story: this.state.story,
+    });
+  };
+
   render() {
     return (
       <View>
@@ -21,14 +41,23 @@ export default class writeScreen extends Component {
           }}
         ></Header>
         <TextInput
+          onChangeText={(txt) => {
+            this.setState({ storyTitle: txt });
+          }}
           style={[styles.textInputStyle, { marginTop: 37 }]}
           placeholder="Enter Story Title"
         ></TextInput>
         <TextInput
+          onChangeText={(txt) => {
+            this.setState({ storyAuthor: txt });
+          }}
           style={[styles.textInputStyle, { marginTop: 25 }]}
           placeholder="Enter Name of Author"
         ></TextInput>
         <TextInput
+          onChangeText={(txt) => {
+            this.setState({ story: txt });
+          }}
           multiline={true}
           style={[
             styles.textInputStyle,
@@ -36,7 +65,7 @@ export default class writeScreen extends Component {
           ]}
           placeholder="Write Your Story"
         ></TextInput>
-        <TouchableOpacity style={styles.buttonStyle}>
+        <TouchableOpacity onPress={this.submitStory} style={styles.buttonStyle}>
           <Text style={styles.buttonTextStyle}>submit</Text>
         </TouchableOpacity>
       </View>

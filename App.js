@@ -24,7 +24,7 @@ export default class App extends Component {
 
               // You can return any component that you like here!
               return (
-                <Image style={{ width: 20, height: 20 }} source={imgName} />
+                <Image style={{ width: 25, height: 25 }} source={imgName} />
               );
             },
           })}
