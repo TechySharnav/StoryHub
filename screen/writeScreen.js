@@ -6,9 +6,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  ToastAndroid,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Header } from "react-native-elements";
 import db from "../config.js";
+
+var isSubmitted = false;
 
 export default class writeScreen extends Component {
   constructor() {
@@ -23,52 +27,65 @@ export default class writeScreen extends Component {
 
   submitStory = async () => {
     console.log("Submitting");
-    db.collection("stories").add({
-      storyTitle: this.state.storyTitle,
-      storyAuthor: this.state.storyAuthor,
-      story: this.state.story,
-    });
+    db.collection("stories")
+      .add({
+        storyTitle: this.state.storyTitle,
+        storyAuthor: this.state.storyAuthor,
+        story: this.state.story,
+      })
+      .then(() => {
+        ToastAndroid.show("Story Submitted Successfully", ToastAndroid.SHORT);
+        isSubmitted = true;
+      });
+    if (isSubmitted === false) {
+      ToastAndroid.show("Error Submitting the Story", ToastAndroid.SHORT);
+    }
   };
 
   render() {
     return (
-      <View>
-        <Header
-          backgroundColor="#ef4b4c"
-          centerComponent={{
-            text: "Write a Story",
-            style: { color: "#e9ebeb", fontSize: 18 },
-          }}
-        ></Header>
-        <TextInput
-          onChangeText={(txt) => {
-            this.setState({ storyTitle: txt });
-          }}
-          style={[styles.textInputStyle, { marginTop: 37 }]}
-          placeholder="Enter Story Title"
-        ></TextInput>
-        <TextInput
-          onChangeText={(txt) => {
-            this.setState({ storyAuthor: txt });
-          }}
-          style={[styles.textInputStyle, { marginTop: 25 }]}
-          placeholder="Enter Name of Author"
-        ></TextInput>
-        <TextInput
-          onChangeText={(txt) => {
-            this.setState({ story: txt });
-          }}
-          multiline={true}
-          style={[
-            styles.textInputStyle,
-            { marginTop: 25, minHeight: "38%", textAlignVertical: "top" },
-          ]}
-          placeholder="Write Your Story"
-        ></TextInput>
-        <TouchableOpacity onPress={this.submitStory} style={styles.buttonStyle}>
-          <Text style={styles.buttonTextStyle}>submit</Text>
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView style={{ flex: 1 }} enabled>
+        <View style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Header
+            backgroundColor="#ef4b4c"
+            centerComponent={{
+              text: "Write a Story",
+              style: { color: "#e9ebeb", fontSize: 18 },
+            }}
+          ></Header>
+          <TextInput
+            onChangeText={(txt) => {
+              this.setState({ storyTitle: txt });
+            }}
+            style={[styles.textInputStyle, { marginTop: 37 }]}
+            placeholder="Enter Story Title"
+          ></TextInput>
+          <TextInput
+            onChangeText={(txt) => {
+              this.setState({ storyAuthor: txt });
+            }}
+            style={[styles.textInputStyle, { marginTop: 25 }]}
+            placeholder="Enter Name of Author"
+          ></TextInput>
+          <TextInput
+            onChangeText={(txt) => {
+              this.setState({ story: txt });
+            }}
+            multiline={true}
+            style={[
+              styles.textInputStyle,
+              { marginTop: 25, minHeight: "38%", textAlignVertical: "top" },
+            ]}
+            placeholder="Write Your Story"
+          ></TextInput>
+          <TouchableOpacity
+            onPress={this.submitStory}
+            style={styles.buttonStyle}
+          >
+            <Text style={styles.buttonTextStyle}>submit</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     );
   }
 }
@@ -90,6 +107,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     padding: 10,
     marginTop: 12,
+    marginBottom: 20,
   },
   buttonTextStyle: {
     textTransform: "uppercase",
