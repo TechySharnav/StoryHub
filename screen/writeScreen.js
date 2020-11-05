@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   ToastAndroid,
   KeyboardAvoidingView,
+  Alert,
 } from "react-native";
 import { Header } from "react-native-elements";
 import db from "../config.js";
 
 var isSubmitted = false;
+var regexp = /^\S*$/;
 
 export default class writeScreen extends Component {
   constructor() {
@@ -26,19 +28,26 @@ export default class writeScreen extends Component {
   }
 
   submitStory = async () => {
-    console.log("Submitting");
-    db.collection("stories")
-      .add({
-        storyTitle: this.state.storyTitle,
-        storyAuthor: this.state.storyAuthor,
-        story: this.state.story,
-      })
-      .then(() => {
+    if (this.state.storyTitle !== "" || this.state.story !== "") {
+      console.log("Submitting");
+      await db
+        .collection("stories")
+        .add({
+          storyTitle: this.state.storyTitle,
+          storyAuthor: this.state.storyAuthor,
+          story: this.state.story,
+        })
+        .catch(() => {
+          isSubmitted = true;
+        });
+
+      if (isSubmitted === false) {
         ToastAndroid.show("Story Submitted Successfully", ToastAndroid.SHORT);
-        isSubmitted = true;
-      });
-    if (isSubmitted === false) {
-      ToastAndroid.show("Error Submitting the Story", ToastAndroid.SHORT);
+      } else {
+        ToastAndroid.show("Error Submitting the Story", ToastAndroid.SHORT);
+      }
+    } else {
+      Alert.alert("Story Title or Story cannot be blank");
     }
   };
 
@@ -55,14 +64,14 @@ export default class writeScreen extends Component {
           ></Header>
           <TextInput
             onChangeText={(txt) => {
-              this.setState({ storyTitle: txt });
+              this.setState({ storyTitle: txt.trim() });
             }}
             style={[styles.textInputStyle, { marginTop: 37 }]}
             placeholder="Enter Story Title"
           ></TextInput>
           <TextInput
             onChangeText={(txt) => {
-              this.setState({ storyAuthor: txt });
+              this.setState({ storyAuthor: txt.trim() });
             }}
             style={[styles.textInputStyle, { marginTop: 25 }]}
             placeholder="Enter Name of Author"
