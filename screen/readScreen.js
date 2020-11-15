@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import {
-  View,
-  Image,
-  TextInput,
-  Text,
-  ScrollView,
-  Keyboard,
-} from "react-native";
+import { View, Text, FlatList } from "react-native";
 import { Header, SearchBar } from "react-native-elements";
 import db from "../config.js";
 
@@ -15,42 +8,32 @@ export default class readScreen extends Component {
     super(props);
     this.state = {
       searchTxt: "",
-      allStories: [{ story: "", storyTitle: "", storyAuthor: "" }],
+      allStories: [],
       funcCalled: false,
       filterStories: [],
-      keyboardVisible: false,
+      lastVisibleStory: null,
     };
   }
 
-  componentDidMount() {
-    this.getStories();
+  async componentDidMount() {
+    await this.getStories();
     setTimeout(() => this.setState({ funcCalled: true }), 2000);
-    this.keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      () => {
-        this.setState({ keyboardVisible: true });
-      }
-    );
-    this.keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      () => {
-        this.setState({ keyboardVisible: false });
-      }
-    );
   }
 
   getStories = async () => {
     var storyRef = await db
       .collection("stories")
       .where("story", "!=", "")
+      .limit(6)
       .get();
 
     storyRef.docs.map(async (doc) => {
       var storyData = await doc.data();
       this.state.allStories.push(storyData);
+      this.setState({ lastVisibleStory: doc });
       console.log(this.state.allStories);
     });
-    this.state.allStories.shift();
+    this.state.allStories = [...new Set(this.state.allStories)];
   };
 
   render() {
@@ -70,7 +53,7 @@ export default class readScreen extends Component {
               borderWidth: 0,
             }}
             round={true}
-            placeholder="Type Here..."
+            placeholder="Search Stories/Authors"
             onChangeText={(txt) => this.setState({ searchTxt: txt.trim() })}
             value={this.state.searchTxt}
             lightTheme={true}
@@ -80,46 +63,42 @@ export default class readScreen extends Component {
               borderBottomColor: "#3d619b",
               marginTop: -1,
             }}
-            inputStyle={{ padding: -10 }}
+            inputStyle={{ padding: -10, fontSize: 15 }}
           />
-          <ScrollView
-            style={{
-              height: this.state.keyboardVisible
-                ? this.state.allStories.length * 39 + 30
-                : this.state.allStories.length * 100,
-            }}
-          >
-            {this.state.allStories.map((story) => (
+          <FlatList
+            contentContainerStyle={{ paddingBottom: 165 }}
+            data={this.state.allStories}
+            renderItem={({ item }) => (
               <View
-                key={story.storyAuthor + story.storyTitle + ""}
                 style={{
                   backgroundColor: "#e9ebeb",
                   borderColor: "#43506c",
                   borderWidth: 2,
                   borderRadius: 6,
                   marginTop: 15,
-                  marginLeft: 5,
+                  marginLeft: 7,
                   maxWidth: "97%",
                 }}
               >
                 <Text
-                  style={{ marginLeft: 5, fontWeight: "bold", fontSize: 20 }}
+                  style={{ fontWeight: "bold", marginLeft: 5, fontSize: 20 }}
                 >
-                  {story.storyTitle}
+                  {item.storyTitle}
                 </Text>
-                <Text
-                  style={{ marginLeft: 5, fontWeight: "normal", fontSize: 12 }}
-                >
-                  Author: {story.storyAuthor}
+                <Text style={{ marginLeft: 5, fontSize: 12 }}>
+                  Author: {item.storyAuthor}
                 </Text>
               </View>
-            ))}
-          </ScrollView>
+            )}
+            keyExtractor={(item, index) => {
+              item.storyAuthor + index.toString();
+            }}
+          />
         </View>
       );
     } else {
       var allStories = this.state.allStories;
-      searchTxt = this.state.searchTxt;
+      var searchTxt = this.state.searchTxt;
 
       for (var i = 0; i < allStories.length; i++) {
         if (
@@ -149,7 +128,7 @@ export default class readScreen extends Component {
               borderWidth: 0,
             }}
             round={true}
-            placeholder="Type Here..."
+            placeholder="Search Stories/Authors"
             onChangeText={(txt) =>
               this.setState({ searchTxt: txt.trim(), filterStories: [] })
             }
@@ -161,64 +140,38 @@ export default class readScreen extends Component {
               borderBottomColor: "#3d619b",
               marginTop: -1,
             }}
-            inputStyle={{ padding: -10 }}
+            inputStyle={{ padding: -10, fontSize: 15 }}
           />
 
-          <ScrollView
-            style={{
-              height:
-                this.state.keyboardVisible &&
-                this.state.filterStories.length > 2
-                  ? this.state.filterStories.length * 50 + 25
-                  : this.state.filterStories.length * 80 + 30,
-            }}
-          >
-            {this.state.filterStories.length === 0 ? (
-              <Text
+          <FlatList
+            contentContainerStyle={{ paddingBottom: 165 }}
+            data={this.state.filterStories}
+            renderItem={({ item }) => (
+              <View
                 style={{
-                  fontSize: 12,
-                  textAlign: "center",
-                  fontStyle: "italic",
+                  backgroundColor: "#e9ebeb",
+                  borderColor: "#43506c",
+                  borderWidth: 2,
+                  borderRadius: 6,
+                  marginTop: 15,
+                  marginLeft: 7,
+                  maxWidth: "97%",
                 }}
               >
-                No story or author exists with this name
-              </Text>
-            ) : (
-              this.state.filterStories.map((story) => (
-                <View
-                  key={story.storyAuthor + story.storyTitle + ""}
-                  style={{
-                    backgroundColor: "#e9ebeb",
-                    borderColor: "#43506c",
-                    borderWidth: 2,
-                    borderRadius: 6,
-                    marginTop: 15,
-                    marginLeft: 5,
-                    maxWidth: "97%",
-                  }}
+                <Text
+                  style={{ fontWeight: "bold", marginLeft: 5, fontSize: 20 }}
                 >
-                  <Text
-                    style={{
-                      marginLeft: 5,
-                      fontWeight: "bold",
-                      fontSize: 20,
-                    }}
-                  >
-                    {story.storyTitle}
-                  </Text>
-                  <Text
-                    style={{
-                      marginLeft: 5,
-                      fontWeight: "normal",
-                      fontSize: 12,
-                    }}
-                  >
-                    Author: {story.storyAuthor}
-                  </Text>
-                </View>
-              ))
+                  {item.storyTitle}
+                </Text>
+                <Text style={{ marginLeft: 5, fontSize: 12 }}>
+                  Author: {item.storyAuthor}
+                </Text>
+              </View>
             )}
-          </ScrollView>
+            keyExtractor={(item, index) => {
+              item.storyAuthor + index.toString();
+            }}
+          />
         </View>
       );
     }
