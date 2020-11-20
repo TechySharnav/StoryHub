@@ -1,42 +1,52 @@
 import React, { Component } from "react";
 import writeScreen from "./screen/writeScreen";
 import readScreen from "./screen/readScreen";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
+import LoginScreen from "./screen/LoginScreen";
+import { createBottomTabNavigator } from "react-navigation-tabs";
 import { Image } from "react-native";
-
-const Tab = createBottomTabNavigator();
+import { createAppContainer, createSwitchNavigator } from "react-navigation";
 
 export default class App extends Component {
   render() {
-    return (
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({}) => {
-              let imgName;
-
-              if (route.name === "Read Story") {
-                imgName = require("./assets/read.png");
-              } else if (route.name === "Write Story") {
-                imgName = require("./assets/write.png");
-              }
-
-              // You can return any component that you like here!
-              return (
-                <Image style={{ width: 25, height: 25 }} source={imgName} />
-              );
-            },
-          })}
-          tabBarOptions={{
-            activeTintColor: "tomato",
-            inactiveTintColor: "gray",
-          }}
-        >
-          <Tab.Screen name="Read Story" component={readScreen} />
-          <Tab.Screen name="Write Story" component={writeScreen} />
-        </Tab.Navigator>
-      </NavigationContainer>
-    );
+    return <AppContainer />;
   }
 }
+
+const Tab = createBottomTabNavigator(
+  {
+    Read: { screen: readScreen },
+    Write: { screen: writeScreen },
+  },
+  {
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: () => {
+        let imgName;
+        const routeName = navigation.state.routeName;
+
+        if (routeName === "Read") {
+          imgName = require("./assets/read.png");
+        } else if (routeName === "Write") {
+          imgName = require("./assets/write.png");
+        }
+
+        // You can return any component that you like here!
+        return (
+          <Image
+            style={{ width: 25, height: 25, marginTop: 2 }}
+            source={imgName}
+          />
+        );
+      },
+    }),
+    tabBarOptions: {
+      activeTintColor: "tomato",
+      inactiveTintColor: "gray",
+    },
+  }
+);
+const AppNavigator = createSwitchNavigator({
+  Login: { screen: LoginScreen },
+  Tab: { screen: Tab },
+});
+
+const AppContainer = createAppContainer(AppNavigator);
