@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {
   View,
-  Image,
+  Keyboard,
   TextInput,
   Text,
   StyleSheet,
@@ -11,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { Header } from "react-native-elements";
+import { ScrollView } from "react-native-gesture-handler";
 import db from "../config.js";
 
 var isSubmitted = false;
@@ -24,7 +25,21 @@ export default class writeScreen extends Component {
       storyTitle: "",
       storyAuthor: "",
       story: "",
+      keyboardVisible: false,
     };
+  }
+  componentDidMount() {
+    this.keyboardDidShowListener = Keyboard.addListener("keyboardDidShow", () =>
+      this.setState({ keyboardVisible: true })
+    );
+    this.keyboardDidHideListener = Keyboard.addListener("keyboardDidHide", () =>
+      this.setState({ keyboardVisible: false })
+    );
+  }
+
+  componentWillUnmount() {
+    this.keyboardDidShowListener.remove();
+    this.keyboardDidHideListener.remove();
   }
 
   submitStory = async () => {
@@ -53,48 +68,55 @@ export default class writeScreen extends Component {
 
   render() {
     return (
-      <KeyboardAvoidingView style={{ flex: 1 }} enabled>
-        <View style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Header
-            backgroundColor="#ef4b4c"
-            centerComponent={{
-              text: "Write a Story",
-              style: { color: "#e9ebeb", fontSize: 18 },
-            }}
-          ></Header>
-          <TextInput
-            onChangeText={(txt) => {
-              this.setState({ storyTitle: txt.trim() });
-            }}
-            style={[styles.textInputStyle, { marginTop: 37 }]}
-            placeholder="Enter Story Title"
-          ></TextInput>
-          <TextInput
-            onChangeText={(txt) => {
-              this.setState({ storyAuthor: txt.trim() });
-            }}
-            style={[styles.textInputStyle, { marginTop: 25 }]}
-            placeholder="Enter Name of Author"
-          ></TextInput>
-          <TextInput
-            onChangeText={(txt) => {
-              this.setState({ story: txt });
-            }}
-            multiline={true}
-            style={[
-              styles.textInputStyle,
-              { marginTop: 25, minHeight: "38%", textAlignVertical: "top" },
-            ]}
-            placeholder="Write Your Story"
-          ></TextInput>
-          <TouchableOpacity
-            onPress={this.submitStory}
-            style={styles.buttonStyle}
-          >
-            <Text style={styles.buttonTextStyle}>submit</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+      <ScrollView
+        contentContainerStyle={{
+          flex: 6,
+        }}
+      >
+        <KeyboardAvoidingView style={{ flex: 1 }} enabled>
+          <View style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Header
+              backgroundColor="#ef4b4c"
+              centerComponent={{
+                text: "Write a Story",
+                style: { color: "#e9ebeb", fontSize: 18 },
+              }}
+            ></Header>
+            <TextInput
+              autoFocus={true}
+              onChangeText={(txt) => {
+                this.setState({ storyTitle: txt.trim() });
+              }}
+              style={[styles.textInputStyle, { marginTop: 60 }]}
+              placeholder="Enter Story Title"
+            ></TextInput>
+            <TextInput
+              onChangeText={(txt) => {
+                this.setState({ storyAuthor: txt.trim() });
+              }}
+              style={[styles.textInputStyle, { marginTop: 25 }]}
+              placeholder="Enter Name of Author"
+            ></TextInput>
+            <TextInput
+              onChangeText={(txt) => {
+                this.setState({ story: txt });
+              }}
+              multiline={true}
+              style={[
+                styles.textInputStyle,
+                { marginTop: 25, minHeight: "38%", textAlignVertical: "top" },
+              ]}
+              placeholder="Write Your Story"
+            ></TextInput>
+            <TouchableOpacity
+              onPress={this.submitStory}
+              style={styles.buttonStyle}
+            >
+              <Text style={styles.buttonTextStyle}>submit</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </ScrollView>
     );
   }
 }

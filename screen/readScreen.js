@@ -30,10 +30,7 @@ export default class readScreen extends Component {
     storyRef.docs.map(async (doc) => {
       var storyData = await doc.data();
       this.state.allStories.push(storyData);
-      this.setState({ lastVisibleStory: doc });
-      console.log(this.state.allStories);
     });
-    this.state.allStories = [...new Set(this.state.allStories)];
   };
 
   render() {
@@ -53,7 +50,7 @@ export default class readScreen extends Component {
               borderWidth: 0,
             }}
             round={true}
-            placeholder="Search Stories/Authors"
+            placeholder="Search for Stories"
             onChangeText={(txt) => this.setState({ searchTxt: txt.trim() })}
             value={this.state.searchTxt}
             lightTheme={true}
@@ -91,7 +88,7 @@ export default class readScreen extends Component {
               </View>
             )}
             keyExtractor={(item, index) => {
-              item.storyAuthor + index.toString();
+              index.toString();
             }}
           />
         </View>
@@ -102,9 +99,6 @@ export default class readScreen extends Component {
 
       for (var i = 0; i < allStories.length; i++) {
         if (
-          allStories[i].storyAuthor
-            .toLowerCase()
-            .includes(searchTxt.toLowerCase()) ||
           allStories[i].storyTitle
             .toLowerCase()
             .includes(searchTxt.toLowerCase())
